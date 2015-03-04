@@ -267,36 +267,39 @@ def getCmdName(pid, split_args):
     if cmdline[-1] == '' and len(cmdline) > 1:
         cmdline = cmdline[:-1]
 
-    path = proc.path(pid, 'exe')
-    try:
-        path = os.readlink(path)
-        # Some symlink targets were seen to contain NULs on RHEL 5 at least
-        # https://github.com/pixelb/scripts/pull/10, so take string up to NUL
-        path = path.split('\0')[0]
-    except OSError:
-        val = sys.exc_info()[1]
-        if (val.errno == errno.ENOENT or # either kernel thread or process gone
-            val.errno == errno.EPERM):
-            raise LookupError
-        raise
-
-    if split_args:
-        return " ".join(cmdline)
-    if path.endswith(" (deleted)"):
-        path = path[:-10]
-        if os.path.exists(path):
-            path += " [updated]"
-        else:
-            #The path could be have prelink stuff so try cmdline
-            #which might have the full path present. This helped for:
-            #/usr/libexec/notification-area-applet.#prelink#.fX7LCT (deleted)
-            if os.path.exists(cmdline[0]):
-                path = cmdline[0] + " [updated]"
+    if kernel_version is None:
+        path = proc.path(pid, 'exe')
+        try:
+            path = os.readlink(path)
+            # Some symlink targets were seen to contain NULs on RHEL 5 at least
+            # https://github.com/pixelb/scripts/pull/10, so take string up to NUL
+            path = path.split('\0')[0]
+        except OSError:
+            val = sys.exc_info()[1]
+            if (val.errno == errno.ENOENT or # either kernel thread or process gone
+                val.errno == errno.EPERM):
+                raise LookupError
+            raise
+    
+        if split_args:
+            return " ".join(cmdline)
+        if path.endswith(" (deleted)"):
+            path = path[:-10]
+            if os.path.exists(path):
+                path += " [updated]"
             else:
-                path += " [deleted]"
-    exe = os.path.basename(path)
+                #The path could be have prelink stuff so try cmdline
+                #which might have the full path present. This helped for:
+                #/usr/libexec/notification-area-applet.#prelink#.fX7LCT (deleted)
+                if os.path.exists(cmdline[0]):
+                    path = cmdline[0] + " [updated]"
+                else:
+                    path += " [deleted]"
+        exe = os.path.basename(path)
+    
     cmd = proc.open(pid, 'status').readline()[6:-1]
-    if exe.startswith(cmd):
+    
+    if exe.startswith(cmd) and kernel_version is None:
         cmd = exe #show non truncated version
         #Note because we show the non truncated name
         #one can have separated programs as follows:
