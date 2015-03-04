@@ -299,12 +299,13 @@ def getCmdName(pid, split_args):
     
     cmd = proc.open(pid, 'status').readline()[6:-1]
     
-    if exe.startswith(cmd) and kernel_version is None:
-        cmd = exe #show non truncated version
-        #Note because we show the non truncated name
-        #one can have separated programs as follows:
-        #584.0 KiB +   1.0 MiB =   1.6 MiB    mozilla-thunder (exe -> bash)
-        # 56.0 MiB +  22.2 MiB =  78.2 MiB    mozilla-thunderbird-bin
+    if kernel_version is None:
+        if exe.startswith(cmd):
+            cmd = exe #show non truncated version
+            #Note because we show the non truncated name
+            #one can have separated programs as follows:
+            #584.0 KiB +   1.0 MiB =   1.6 MiB    mozilla-thunder (exe -> bash)
+            # 56.0 MiB +  22.2 MiB =  78.2 MiB    mozilla-thunderbird-bin
     return cmd
 
 
