@@ -141,7 +141,7 @@ proc = Proc()
 def parse_options():
     try:
         long_options = ['split-args', 'help', 'total']
-        opts, args = getopt.getopt(sys.argv[1:], "shtp:w:", long_options)
+        opts, args = getopt.getopt(sys.argv[1:], "shtp:w:k:", long_options)
     except getopt.GetoptError:
         sys.stderr.write(help())
         sys.exit(3)
