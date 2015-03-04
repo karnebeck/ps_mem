@@ -202,7 +202,7 @@ def help():
 #(major,minor,release)
 def kernel_ver():
     if kernel_version:
-        kv = kernel_version
+        kv = kernel_version.split(".")[:3]
     else:
         kv = proc.open('sys/kernel/osrelease').readline().split(".")[:3]
     last = len(kv)
