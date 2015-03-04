@@ -179,7 +179,7 @@ def parse_options():
                 sys.exit(3)
         if o in ('-k',):
             try:
-                kernel_version = a
+                kernel_version = str(a)
             except:
                 sys.stderr.write(help())
                 sys.exit(3)
@@ -471,7 +471,7 @@ def verify_environment():
             raise
 
 if __name__ == '__main__':
-    split_args, pids_to_show, watch, only_total = parse_options()
+    split_args, pids_to_show, watch, only_total, kernel_version = parse_options()
     verify_environment()
 
     if not only_total:
