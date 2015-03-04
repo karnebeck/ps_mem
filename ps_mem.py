@@ -452,7 +452,7 @@ def print_memory_usage(sorted_cmds, shareds, count, total):
                          ("-" * 33, " " * 24, human(total), "=" * 33))
 
 def verify_environment():
-    if os.geteuid() != 0 && kernel_version is None:
+    if os.geteuid() != 0 and kernel_version is None:
         sys.stderr.write("Sorry, root permission required.\n")
         if __name__ == '__main__':
             sys.stderr.close()
