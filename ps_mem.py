@@ -405,24 +405,26 @@ def get_memory_usage( pids_to_show, split_args, include_self=False, only_self=Fa
             #kernel threads don't have exe links or
             #process gone
             continue
-
-        try:
-            private, shared, mem_id = getMemStats(pid)
-        except RuntimeError:
-            continue #process gone
-        if shareds.get(cmd):
-            if have_pss: #add shared portion of PSS together
-                shareds[cmd] += shared
-            elif shareds[cmd] < shared: #just take largest shared val
+        
+        # ignore this cmd because permission is denied to smaps
+        if cmd is not "lxc-init":
+            try:
+                private, shared, mem_id = getMemStats(pid)
+            except RuntimeError:
+                continue #process gone
+            if shareds.get(cmd):
+                if have_pss: #add shared portion of PSS together
+                    shareds[cmd] += shared
+                elif shareds[cmd] < shared: #just take largest shared val
+                    shareds[cmd] = shared
+            else:
                 shareds[cmd] = shared
-        else:
-            shareds[cmd] = shared
-        cmds[cmd] = cmds.setdefault(cmd, 0) + private
-        if cmd in count:
-            count[cmd] += 1
-        else:
-            count[cmd] = 1
-        mem_ids.setdefault(cmd, {}).update({mem_id:None})
+            cmds[cmd] = cmds.setdefault(cmd, 0) + private
+            if cmd in count:
+                count[cmd] += 1
+            else:
+                count[cmd] = 1
+            mem_ids.setdefault(cmd, {}).update({mem_id:None})
 
     #Add shared mem for each program
     total = 0
