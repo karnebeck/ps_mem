@@ -406,8 +406,8 @@ def get_memory_usage( pids_to_show, split_args, include_self=False, only_self=Fa
             #process gone
             continue
         
-        # ignore this cmd because permission is denied to smaps
-        if cmd is not "lxc-init":
+        # ignore these cmd because permission is denied to smaps
+        if cmd not in ["lxc-init", "supervisord"]:
             try:
                 private, shared, mem_id = getMemStats(pid)
             except RuntimeError:
