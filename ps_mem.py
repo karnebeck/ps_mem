@@ -155,6 +155,7 @@ def parse_options():
     pids_to_show = None
     watch = None
     only_total = False
+    kernel_version = None
 
     for o, a in opts:
         if o in ('-s', '--split-args'):
@@ -176,8 +177,14 @@ def parse_options():
             except:
                 sys.stderr.write(help())
                 sys.exit(3)
+        if o in ('-k',):
+            try:
+                kernel_version = a
+            except:
+                sys.stderr.write(help())
+                sys.exit(3)
 
-    return (split_args, pids_to_show, watch, only_total)
+    return (split_args, pids_to_show, watch, only_total, kernel_version)
 
 def help():
     help_msg = 'Usage: ps_mem [OPTION]...\n' \
@@ -187,13 +194,17 @@ def help():
     '  -p <pid>[,pid2,...pidN]     Only show memory usage PIDs in the specified list\n' \
     '  -s, --split-args            Show and separate by, all command line arguments\n' \
     '  -t, --total                 Show only the total value\n' \
-    '  -w <N>                      Measure and show process memory every N seconds\n'
+    '  -w <N>                      Measure and show process memory every N seconds\n' \
+    '  -k <V>                      Manually set the kernel version\n'
 
     return help_msg
 
 #(major,minor,release)
 def kernel_ver():
-    kv = proc.open('sys/kernel/osrelease').readline().split(".")[:3]
+    if kernel_version:
+        kv = kernel_version
+    else:
+        kv = proc.open('sys/kernel/osrelease').readline().split(".")[:3]
     last = len(kv)
     if last == 2:
         kv.append('0')
@@ -441,7 +452,7 @@ def print_memory_usage(sorted_cmds, shareds, count, total):
                          ("-" * 33, " " * 24, human(total), "=" * 33))
 
 def verify_environment():
-    if os.geteuid() != 0:
+    if os.geteuid() != 0 && kernel_version is None:
         sys.stderr.write("Sorry, root permission required.\n")
         if __name__ == '__main__':
             sys.stderr.close()
